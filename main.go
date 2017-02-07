@@ -28,11 +28,12 @@ func main() {
 	columnWidth := int64(*columnWidthFlag)
 	separator := *separatorFlag
 
-	var err error
-	for err == nil {
+	for true {
 		written, err := io.CopyN(os.Stdout, os.Stdin, columnWidth)
 		if written == columnWidth && err == nil {
 			io.WriteString(os.Stdout, separator)
+		} else {
+			break
 		}
 	}
 }
