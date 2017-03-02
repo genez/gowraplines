@@ -15,25 +15,46 @@
 package main
 
 import (
+	"bufio"
 	"flag"
 	"io"
 	"os"
 )
 
-var columnWidthFlag = flag.Int("columnWidth", 80, "sets column width for line breaks")
+var operationFlag = flag.String("operation", "", "wrap or unwrap lines")
+var columnWidthFlag = flag.Int("columnWidth", 0, "sets column width for line breaks")
 var separatorFlag = flag.String("separator", "\r\n", "string to use as separator")
 
 func main() {
 	flag.Parse()
+
+	if *operationFlag == "" {
+		flag.Usage()
+		return
+	}
+
+	if *columnWidthFlag == 0 {
+		flag.Usage()
+		return
+	}
+
 	columnWidth := int64(*columnWidthFlag)
 	separator := *separatorFlag
+	operation := *operationFlag
 
-	for true {
-		written, err := io.CopyN(os.Stdout, os.Stdin, columnWidth)
-		if written == columnWidth && err == nil {
-			io.WriteString(os.Stdout, separator)
-		} else {
-			break
+	if operation == "wrap" {
+		for true {
+			written, err := io.CopyN(os.Stdout, os.Stdin, columnWidth)
+			if written == columnWidth && err == nil {
+				io.WriteString(os.Stdout, separator)
+			} else {
+				break
+			}
+		}
+	} else {
+		scanner := bufio.NewScanner(os.Stdin)
+		for scanner.Scan() {
+			io.WriteString(os.Stdout, scanner.Text())
 		}
 	}
 }
